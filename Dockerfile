@@ -11,13 +11,14 @@ RUN apt-get update && apt-get install -y \
     xz-utils \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Zig (using latest stable release)
-ARG ZIG_VERSION=0.13.0
-RUN wget https://ziglang.org/download/${ZIG_VERSION}/zig-linux-x86_64-${ZIG_VERSION}.tar.xz \
-    && tar -xf zig-linux-x86_64-${ZIG_VERSION}.tar.xz \
-    && mv zig-linux-x86_64-${ZIG_VERSION} /usr/local/zig \
+# Install Zig (minimum 0.15.2 )
+ARG ZIG_VERSION=0.15.2
+
+RUN wget https://ziglang.org/download/${ZIG_VERSION}/zig-x86_64-linux-${ZIG_VERSION}.tar.xz \
+    && tar -xf zig-x86_64-linux-${ZIG_VERSION}.tar.xz \
+    && mv zig-x86_64-linux-${ZIG_VERSION} /usr/local/zig \
     && ln -s /usr/local/zig/zig /usr/local/bin/zig \
-    && rm zig-linux-x86_64-${ZIG_VERSION}.tar.xz
+    && rm zig-x86_64-linux-${ZIG_VERSION}.tar.xz
 
 # Set working directory
 WORKDIR /app
