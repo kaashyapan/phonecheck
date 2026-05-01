@@ -1,4 +1,4 @@
-FROM ubuntu:22.04
+FROM ubuntu:22.04 AS build
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
@@ -32,8 +32,22 @@ RUN chmod +x build_wrapper.sh && ./build_wrapper.sh
 # Build Zig application
 RUN zig build -Doptimize=ReleaseFast
 
-# Expose port
-EXPOSE 8080
+# --- runtime stage ---
 
-# Run the application
-CMD ["./zig-out/bin/phonecheck"]
+FROM ubuntu:22.04 AS runtime
+
+RUN apt-get update && apt-get install -y \
+    libphonenumber8 \
+    libprotobuf23 \
+    libicu70 \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+COPY --from=build /app/zig-out/bin/phonecheck ./
+COPY --from=build /app/lib/libphonenumber_wrapper.so ./lib/
+
+# Fix the shared lib path so the binary finds the wrapper
+ENV LD_LIBRARY_PATH=/app/lib
+
+EXPOSE 8080
+CMD ["/app/phonecheck"]
